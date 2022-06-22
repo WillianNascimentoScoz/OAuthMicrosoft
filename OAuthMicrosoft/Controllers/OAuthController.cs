@@ -54,7 +54,7 @@ namespace Microsoft.OAuth.Controllers
             queryParams["response_mode"] = "query";
             queryParams["state"] = state;
             queryParams["scope"] = _staticConfig["ApplicationOAuth:Scopes"];
-            queryParams["redirect_uri"] = _staticConfig["ApplicationOAuth:CallbackUrl"];
+            queryParams["redirect_uri"] = _staticConfig["ApplicationOAuth:RedirectUri"];
 
             uriBuilder.Query = queryParams.ToString();
 
@@ -82,9 +82,9 @@ namespace Microsoft.OAuth.Controllers
                     { "client_id", _configuration["ApplicationOAuth:ClientID"]},
                     { "scope", _configuration["ApplicationOAuth:Scopes"]},
                     { "code", code },
-                    { "redirect_uri", _configuration["ApplicationOAuth:CallbackUrl"] },
+                    { "redirect_uri", _configuration["ApplicationOAuth:RedirectUri"] },
                     { "grant_type", "authorization_code" },
-                    { "client_secret", _configuration["ApplicationOAuth:SecretValue"] }
+                    { "client_secret", _configuration["ApplicationOAuth:ClientSecret"] }
                 };
 
                 requestMessage.Content = new FormUrlEncodedContent(form);
@@ -165,9 +165,10 @@ namespace Microsoft.OAuth.Controllers
                 {
                     { "client_id", _configuration["ApplicationOAuth:ClientID"]},
                     { "scope", _configuration["ApplicationOAuth:Scopes"]},
-                    { "redirect_uri", _configuration["ApplicationOAuth:CallbackUrl"] },
+                    { "refresh_token", refreshToken },
+                    { "redirect_uri", _configuration["ApplicationOAuth:RedirectUri"] },
                     { "grant_type", "refresh_token" },
-                    { "client_secret", _configuration["ApplicationOAuth:SecretID"] }
+                    { "client_secret", _configuration["ApplicationOAuth:ClientSecret"] }
                 };
 
                 requestMessage.Content = new FormUrlEncodedContent(form);
@@ -177,7 +178,10 @@ namespace Microsoft.OAuth.Controllers
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     String body = await responseMessage.Content.ReadAsStringAsync();
-                    ViewBag.Token = JObject.Parse(body).ToObject<TokenModel>();
+                    var tokenModel = JObject.Parse(body).ToObject<TokenModel>();
+                    JsonConvert.PopulateObject(body, tokenModel);
+
+                    ViewBag.Token = tokenModel;
                 }
                 else
                     error = responseMessage.ReasonPhrase;

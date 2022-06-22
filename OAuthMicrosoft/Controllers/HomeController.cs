@@ -19,8 +19,9 @@ namespace OAuthMicrosoft.Controllers
 
         public IActionResult Index()
         {
-            ViewBag.ClientAppId = _configuration["ApplicationOAuth:ClientID"];
-            ViewBag.CallbackUrl = _configuration["ApplicationOAuth:CallbackUrl"];
+            ViewBag.ClientId = _configuration["ApplicationOAuth:ClientID"];
+            ViewBag.ClientSecret = _configuration["ApplicationOAuth:ClientSecret"];
+            ViewBag.RedirectUrl = _configuration["ApplicationOAuth:RedirectUri"];
             ViewBag.Scope = _configuration["ApplicationOAuth:Scopes"];
 
             return View();
